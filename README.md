@@ -19,9 +19,9 @@ mvn clean package
 ```
 
 ## 相关链接-参考文档
-[FastGPT](https://github.com/labring/FastGPT)
-[钉钉开放平台](https://open.dingtalk.com/document/orgapp/dingtalk-chatbot-for-one-on-one-query)
-[DingTalk Stream Mode demo](https://github.com/open-dingtalk/dingtalk-stream-sdk-java-quick-start) 机器人初始化部分代码直接 copy 这里的
+[FastGPT](https://github.com/labring/FastGPT) \n
+[钉钉开放平台](https://open.dingtalk.com/document/orgapp/dingtalk-chatbot-for-one-on-one-query) \n
+[DingTalk Stream Mode demo](https://github.com/open-dingtalk/dingtalk-stream-sdk-java-quick-start) 机器人初始化部分代码直接 copy 这里的 \n
 
 ## 计划
 
