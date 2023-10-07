@@ -33,7 +33,7 @@ mvn clean package
 3.1 构建自己镜像，项目根目录执行
 
 ```bash
-docker buitd -t botapp:v1
+docker build -t botapp:v1 .
 ```
 3.2准备配置文件，启动容器
 
