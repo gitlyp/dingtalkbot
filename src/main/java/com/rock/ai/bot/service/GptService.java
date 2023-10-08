@@ -13,5 +13,5 @@ public interface GptService {
      * @param content 聊天内容
      * @return 聊天响应
      */
-    String chat(String userId, String content);
+    String chat(String content, String userId);
 }

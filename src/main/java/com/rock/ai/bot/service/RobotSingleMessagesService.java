@@ -60,13 +60,15 @@ public class RobotSingleMessagesService {
         batchSendOTOHeaders.setXAcsDingtalkAccessToken(accessTokenService.getAccessToken());
 
         BatchSendOTORequest batchSendOTORequest = new BatchSendOTORequest();
-        batchSendOTORequest.setMsgKey("sampleText");
+        // 不同类型消息 传参方式不同 有坑 群聊单聊还不一样（吐槽）
+        batchSendOTORequest.setMsgKey("sampleMarkdown");
         batchSendOTORequest.setRobotCode(dingBotConfig.getRobotCode());
         batchSendOTORequest.setUserIds(Collections.singletonList(userId));
 
         JSONObject msgParam = new JSONObject();
         String chat = fastGptService.chat(textContent, userId);
-        msgParam.put("content", chat);
+        msgParam.put("title", textContent);
+        msgParam.put("text", chat);
         batchSendOTORequest.setMsgParam(msgParam.toJSONString());
 
         try {
