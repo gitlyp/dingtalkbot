@@ -42,7 +42,7 @@ public class RobotGroupMessagesService {
             request.setMsgtype("markdown");
             OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
             markdown.setTitle(messageText.getContent());
-            markdown.setText(chat + " \n " + "@" + userId);
+            markdown.setText(chat + " \n\n " + "@" + userId);
             request.setMarkdown(markdown);
             OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
             System.out.println(userId);
