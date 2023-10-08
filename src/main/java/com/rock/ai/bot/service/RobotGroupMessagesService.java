@@ -38,11 +38,12 @@ public class RobotGroupMessagesService {
         try {
 
             OapiRobotSendRequest request = new OapiRobotSendRequest();
-            request.setMsgtype("text");
-            OapiRobotSendRequest.Text text = new OapiRobotSendRequest.Text();
-
-            text.setContent(chat + " \n " + "@" + userId);
-            request.setText(text);
+            // 不同类型消息 传参方式不同 有坑 群聊单聊还不一样（吐槽）
+            request.setMsgtype("markdown");
+            OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
+            markdown.setTitle(messageText.getContent());
+            markdown.setText(chat + " \n " + "@" + userId);
+            request.setMarkdown(markdown);
             OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
             System.out.println(userId);
             at.setAtUserIds(Arrays.asList(userId));

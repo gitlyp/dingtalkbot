@@ -32,7 +32,7 @@ public class FastGptServiceImpl implements GptService {
     private FastGptClient fastGptClient;
 
     @Override
-    public String chat(String userId, String content) {
+    public String chat(String content, String userId) {
         if (!dingBotConfig.getGptEnabled()) {
             return dingBotConfig.getGptResp();
         }
