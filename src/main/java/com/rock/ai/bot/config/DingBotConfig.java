@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Map;
+
 /**
  * @author: Rock.L
  * @date: 2023/10/6
@@ -35,4 +37,7 @@ public class DingBotConfig {
      */
     @Value("${fastgpt.resp:小助手暂时不可用，请稍后重试。}")
     private String gptResp;
+
+    @Value("#{${bot.trade.document:}}")
+    private Map<String,String> documentMap;
 }

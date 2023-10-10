@@ -21,7 +21,7 @@ import java.util.List;
  * @author: Rock.L
  * @date: 2023/10/6
  */
-@Service
+// @Service
 @Slf4j
 public class FastGptServiceImpl implements GptService {
 
