@@ -6,12 +6,16 @@ import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiRobotSendRequest;
 import com.dingtalk.api.response.OapiRobotSendResponse;
 import com.dingtalk.open.app.api.models.bot.ChatbotMessage;
+import com.dingtalk.open.app.api.models.bot.MentionUser;
 import com.dingtalk.open.app.api.models.bot.MessageContent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * bot群聊回复
@@ -42,13 +46,21 @@ public class RobotGroupMessagesService {
             request.setMsgtype("markdown");
             OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
             markdown.setTitle(messageText.getContent());
-            markdown.setText(chat + " \n " + "@" + userId);
+            markdown.setText(chat + " \n\n " + "@" + userId);
             request.setMarkdown(markdown);
+
+            List<MentionUser> atUsers = message.getAtUsers();
+            atUsers.removeIf(mentionUser -> message.getChatbotUserId().equals(mentionUser.getDingtalkId()));
             OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
-            System.out.println(userId);
-            at.setAtUserIds(Arrays.asList(userId));
-//           isAtAll类型如果不为Boolean，请升级至最新SDK
+            //isAtAll类型如果不为Boolean，请升级至最新SDK
             at.setIsAtAll(false);
+            if (atUsers.size() >0) {
+                List<String> collect = atUsers.stream().map(MentionUser::getDingtalkId).collect(Collectors.toList());
+                markdown.setText(chat + " \n\n");
+            } else {
+                at.setAtUserIds(Collections.singletonList(userId));
+                markdown.setText(chat + " \n\n");
+            }
             request.setAt(at);
             OapiRobotSendResponse response = client.execute(request);
             response.getRequestId();

@@ -38,7 +38,7 @@ public class ChatBotCallbackListener implements OpenDingTalkCallbackListener<Cha
             MessageContent text = message.getText();
             if (text != null) {
                 String msg = text.getContent();
-                log.info("receive bot message from user={}, msg={}", message.getSenderId(), msg);
+                log.info("receive bot message from user={}, userNick={}, msg={}", message.getSenderId(), message.getSenderNick(), msg);
                 try {
                     //发送机器人消息
                     if (GROUP_CHAT_CONVERSATION_TYPE.equals(message.getConversationType())) {
