@@ -8,11 +8,17 @@ import com.dingtalk.api.response.OapiRobotSendResponse;
 import com.dingtalk.open.app.api.models.bot.ChatbotMessage;
 import com.dingtalk.open.app.api.models.bot.MentionUser;
 import com.dingtalk.open.app.api.models.bot.MessageContent;
+import com.rock.ai.bot.common.DingChatMessage;
+import com.rock.ai.bot.common.DingChatSession;
+import com.rock.ai.bot.feginclient.n8n.N8nChatInput;
+import com.rock.ai.bot.feginclient.n8n.N8nChatOutput;
+import com.rock.ai.bot.service.impl.N8nChatService;
+import com.rock.ai.bot.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,51 +34,83 @@ import java.util.stream.Collectors;
 public class RobotGroupMessagesService {
 
     @Resource
-    private GptService gptService;
+    private N8nChatService n8nChatService;
 
-    public String send(ChatbotMessage message) throws Exception {
-        String userId = message.getSenderStaffId();
+    /**
+     * websocket 对话
+     * @param message
+     * @return
+     */
+    public Boolean wsSend(ChatbotMessage message){
+        String senderId = message.getSenderStaffId();
+        String senderNick = message.getSenderNick();
 
-        MessageContent messageText = message.getText();
-
-        String chat = gptService.chat(messageText.getContent(), userId);
-
-
-        DingTalkClient client = new DefaultDingTalkClient(message.getSessionWebhook());
-        try {
-
-            OapiRobotSendRequest request = new OapiRobotSendRequest();
-            // 不同类型消息 传参方式不同 有坑 群聊单聊还不一样（吐槽）
-            request.setMsgtype("markdown");
-            OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
-            markdown.setTitle(messageText.getContent());
-            markdown.setText(chat + " \n\n " + "@" + userId);
-            request.setMarkdown(markdown);
-
-            List<MentionUser> atUsers = message.getAtUsers();
-            atUsers.removeIf(mentionUser -> message.getChatbotUserId().equals(mentionUser.getDingtalkId()));
-            OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
-            //isAtAll类型如果不为Boolean，请升级至最新SDK
-            at.setIsAtAll(false);
-            if (atUsers.size() >0) {
-                List<String> collect = atUsers.stream().map(MentionUser::getDingtalkId).collect(Collectors.toList());
-                markdown.setText(chat + " \n\n");
-            } else {
-                at.setAtUserIds(Collections.singletonList(userId));
-                markdown.setText(chat + " \n\n");
-            }
-            request.setAt(at);
-            OapiRobotSendResponse response = client.execute(request);
-            response.getRequestId();
-        } catch (TeaException e) {
-            log.error("RobotGroupMessagesService_send orgGroupSendWithOptions throw TeaException, errCode={}, " +
-                    "errorMessage={}", e.getCode(), e.getMessage(), e);
-            throw e;
-        } catch (Exception e) {
-            log.error("RobotGroupMessagesService_send orgGroupSendWithOptions throw Exception", e);
-            throw e;
+        List<MentionUser> atUsers = message.getAtUsers();
+        atUsers.removeIf(mentionUser -> message.getChatbotUserId().equals(mentionUser.getDingtalkId()));
+        List<String> atUserIds = atUsers.stream().map(MentionUser::getDingtalkId).distinct().collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(atUserIds)) {
+            atUserIds = Collections.singletonList(senderId);
         }
+        String sessionWebhook = message.getSessionWebhook();
 
-        return null;
+        DingChatSession session = new DingChatSession();
+        session.setAtUserIds(atUserIds);
+        session.setSessionWebHook(sessionWebhook);
+
+        N8nChatInput input = new N8nChatInput();
+        input.setChatSession(session);
+        input.setMessageContent(message.getContent());
+
+        N8nChatOutput output = n8nChatService.chat(input);
+
+        log.info("webhook={},atUserId={},senderId={},senderNick={}",
+                sessionWebhook, atUserIds, senderId, senderNick);
+
+        if (output != null && output.getChatMessage() != null) {
+            return sendGroupMessage(output.getChatMessage(), session);
+        } else {
+            return null;
+        }
     }
+
+    /**
+     * api回调对话
+     * @param n8nChatOutput
+     * @return
+     */
+    public Boolean apiSend(N8nChatOutput n8nChatOutput) {
+        DingChatMessage chatMessage = n8nChatOutput.getChatMessage();
+        DingChatSession chatSession = n8nChatOutput.getChatSession();
+        return sendGroupMessage(chatMessage, chatSession);
+    }
+
+    private Boolean sendGroupMessage(DingChatMessage chatMessage, DingChatSession session) {
+        DingTalkClient client = new DefaultDingTalkClient(session.getSessionWebHook());
+        OapiRobotSendRequest request = new OapiRobotSendRequest();
+        // 不同类型消息 传参方式不同 有坑 群聊单聊还不一样（吐槽）
+        request.setMsgtype(chatMessage.getMsgType().getGroup());
+
+        OapiRobotSendRequest.Markdown markdown = new OapiRobotSendRequest.Markdown();
+        markdown.setTitle(chatMessage.getTitle());
+        markdown.setText(chatMessage.getText());
+        request.setMarkdown(markdown);
+
+        OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
+        //isAtAll类型如果不为Boolean，请升级至最新SDK
+        at.setIsAtAll(false);
+        at.setAtUserIds(session.getAtUserIds());
+        request.setAt(at);
+        try {
+            OapiRobotSendResponse response = client.execute(request);
+            return response.isSuccess();
+        } catch (TeaException e) {
+            log.error("RobotGroupMessagesService_sent throw TeaException, errCode={},errorMessage={}",
+                    e.getCode(), e.getMessage(), e);
+            return false;
+        } catch (Exception e) {
+            log.error("RobotGroupMessagesService_send throw Exception", e);
+            return false;
+        }
+    }
+
 }

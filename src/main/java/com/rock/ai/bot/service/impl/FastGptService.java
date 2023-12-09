@@ -2,11 +2,8 @@ package com.rock.ai.bot.service.impl;
 
 import com.rock.ai.bot.config.DingBotConfig;
 import com.rock.ai.bot.feginclient.FastGptClient;
-import com.rock.ai.bot.feginclient.fastgpt.ChatRequest;
-import com.rock.ai.bot.feginclient.fastgpt.ChatResponse;
-import com.rock.ai.bot.feginclient.fastgpt.Choice;
-import com.rock.ai.bot.feginclient.fastgpt.Message;
-import com.rock.ai.bot.service.GptService;
+import com.rock.ai.bot.feginclient.fastgpt.*;
+import com.rock.ai.bot.service.ChatInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -21,9 +18,9 @@ import java.util.List;
  * @author: Rock.L
  * @date: 2023/10/6
  */
-// @Service
+@Service
 @Slf4j
-public class FastGptServiceImpl implements GptService {
+public class FastGptService implements ChatInterface<FastGptInput, FastGptOutput> {
 
     @Resource
     private DingBotConfig dingBotConfig;
@@ -32,17 +29,17 @@ public class FastGptServiceImpl implements GptService {
     private FastGptClient fastGptClient;
 
     @Override
-    public String chat(String content, String userId) {
+    public FastGptOutput chat(FastGptInput input) {
         if (!dingBotConfig.getGptEnabled()) {
-            return dingBotConfig.getGptResp();
+            return new FastGptOutput(dingBotConfig.getGptResp());
         }
 
-        ChatRequest req = buildChatRequest(userId, content);
+        ChatRequest req = buildChatRequest(input.getUserId(), input.getContent());
         ChatResponse resp = null;
         try {
             resp = fastGptClient.chat(req);
         } catch (Exception e) {
-            log.error("fastGptClient.chat error", e);
+            log.error("fastGptClient_chat error", e);
         }
 
         if (resp != null && !CollectionUtils.isEmpty(resp.getChoices())) {
@@ -50,11 +47,11 @@ public class FastGptServiceImpl implements GptService {
 
             Message message = choice.getMessage();
             if (message != null && message.getContent() != null) {
-                return message.getContent();
+                return new FastGptOutput(message.getContent());
             }
         }
 
-        return dingBotConfig.getGptResp();
+        return new FastGptOutput(dingBotConfig.getGptResp());
     }
 
     /**

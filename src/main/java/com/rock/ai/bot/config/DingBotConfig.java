@@ -37,7 +37,4 @@ public class DingBotConfig {
      */
     @Value("${fastgpt.resp:小助手暂时不可用，请稍后重试。}")
     private String gptResp;
-
-    @Value("#{${bot.trade.document:}}")
-    private Map<String,String> documentMap;
 }

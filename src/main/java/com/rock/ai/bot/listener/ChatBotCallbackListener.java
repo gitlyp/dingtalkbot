@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dingtalk.open.app.api.callback.OpenDingTalkCallbackListener;
 import com.dingtalk.open.app.api.models.bot.ChatbotMessage;
 import com.dingtalk.open.app.api.models.bot.MessageContent;
+import com.rock.ai.bot.constant.DingChatType;
 import com.rock.ai.bot.service.RobotGroupMessagesService;
 import com.rock.ai.bot.service.RobotSingleMessagesService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,24 +28,19 @@ public class ChatBotCallbackListener implements OpenDingTalkCallbackListener<Cha
     @Resource
     private RobotGroupMessagesService robotGroupMessagesService;
 
-    /**
-     * 群聊对话方式
-     */
-    private static final String GROUP_CHAT_CONVERSATION_TYPE = "2";
-
     @Override
     public JSONObject execute(ChatbotMessage message) {
         try {
             MessageContent text = message.getText();
             if (text != null) {
                 String msg = text.getContent();
-                log.info("receive bot message from user={}, userNick={}, msg={}", message.getSenderId(), message.getSenderNick(), msg);
+                log.info("receive bot message from userNick={}, userId={}, chatType={}, msg={}", message.getSenderNick(), message.getSenderStaffId(), message.getConversationType(), msg);
                 try {
                     //发送机器人消息
-                    if (GROUP_CHAT_CONVERSATION_TYPE.equals(message.getConversationType())) {
-                        robotGroupMessagesService.send(message);
+                    if (DingChatType.GROUP.getType().equals(message.getConversationType())) {
+                        robotGroupMessagesService.wsSend(message);
                     } else {
-                        robotSingleMessagesService.send(message);
+                        robotSingleMessagesService.wsSend(message);
                     }
 
                 } catch (Exception e) {
