@@ -69,7 +69,7 @@ public class RobotSingleMessagesService {
         chatSession.setSenderNick(senderNick);
 
         N8nChatInput input = new N8nChatInput();
-        input.setMessageContent(message.getContent());
+        input.setMessageContent(message.getText());
         input.setChatSession(chatSession);
 
         N8nChatOutput chatMessage = n8nChatService.chat(input);

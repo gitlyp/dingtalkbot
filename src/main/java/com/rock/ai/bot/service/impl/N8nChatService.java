@@ -28,7 +28,7 @@ public class N8nChatService implements ChatInterface<N8nChatInput, N8nChatOutput
     public N8nChatOutput chat(N8nChatInput input) {
         String[] chat = StringUtil.getChat(input.getMessageContent().getContent());
         input.setCmd(chat[0]);
-        input.setCmd(chat[1]);
+        input.setContent(chat[1]);
 
         N8nChatOutput resp = null;
 

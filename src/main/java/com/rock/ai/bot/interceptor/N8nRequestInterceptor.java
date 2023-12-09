@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 @Slf4j
 public class N8nRequestInterceptor implements RequestInterceptor {
 
-    @Value("${n8n.auth}")
+    @Value("${n8n.auth:}")
     private String auth;
 
     @Override

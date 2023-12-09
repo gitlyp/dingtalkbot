@@ -59,7 +59,7 @@ public class RobotGroupMessagesService {
 
         N8nChatInput input = new N8nChatInput();
         input.setChatSession(session);
-        input.setMessageContent(message.getContent());
+        input.setMessageContent(message.getText());
 
         N8nChatOutput output = n8nChatService.chat(input);
 

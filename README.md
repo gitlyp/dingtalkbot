@@ -38,7 +38,7 @@ docker build -t botapp:v1 .
 3.2准备配置文件，启动容器
 
 ```bash
- docker run -d -p 8110:8080 -v /<your-path>/conf/:/conf botapp:v1
+ docker run -d -p 8110:8080 -v /<your-path>/conf/:/conf botapp:v1 --name bot
 ```
 
 ## 相关链接-参考文档
