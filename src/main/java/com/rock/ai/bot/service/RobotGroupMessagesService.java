@@ -10,6 +10,7 @@ import com.dingtalk.open.app.api.models.bot.MentionUser;
 import com.dingtalk.open.app.api.models.bot.MessageContent;
 import com.rock.ai.bot.common.DingChatMessage;
 import com.rock.ai.bot.common.DingChatSession;
+import com.rock.ai.bot.constant.DingChatType;
 import com.rock.ai.bot.feginclient.n8n.N8nChatInput;
 import com.rock.ai.bot.feginclient.n8n.N8nChatOutput;
 import com.rock.ai.bot.service.impl.N8nChatService;
@@ -54,8 +55,11 @@ public class RobotGroupMessagesService {
         String sessionWebhook = message.getSessionWebhook();
 
         DingChatSession session = new DingChatSession();
+        session.setChatType(DingChatType.GROUP.getType());
         session.setAtUserIds(atUserIds);
         session.setSessionWebHook(sessionWebhook);
+        session.setSenderNick(senderNick);
+        session.setSenderId(senderId);
 
         N8nChatInput input = new N8nChatInput();
         input.setChatSession(session);
