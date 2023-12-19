@@ -74,6 +74,7 @@ public class AccessTokenService {
      */
     @Scheduled(fixedRate = 60 * 1000)
     public void checkAccessToken() {
+        log.info("AccessTokenService_checkAccessToken");
         if (Objects.isNull(accessToken)) {
             return;
         }
@@ -88,6 +89,7 @@ public class AccessTokenService {
     }
 
     private Boolean refreshAccessToken() {
+        log.info("AccessTokenService_refreshAccessToken");
         GetAccessTokenRequest getAccessTokenRequest = new GetAccessTokenRequest()
                 .setAppKey(dingBotConfig.getAppKey())
                 .setAppSecret(dingBotConfig.getAppSecret());
