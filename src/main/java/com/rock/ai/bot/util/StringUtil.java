@@ -16,6 +16,7 @@ public class StringUtil {
      * 定义对话正则表达式模式 字母+任意数量空格+内容
      */
     private static final Pattern CHAT_PATTERN = Pattern.compile("(\\w+\\s+)(.*)");
+    private static final Pattern CMD_PATTERN = Pattern.compile("([\\p{Alpha}]+)");
 
 
     /**
@@ -26,8 +27,15 @@ public class StringUtil {
      */
     public static String[] getChat(String input) {
 
+
         if (Strings.isNotBlank(input)) {
             input = input.trim();
+            Matcher cmdMatcher = CMD_PATTERN.matcher(input);
+            if (cmdMatcher.find()) {
+                String cmd = cmdMatcher.group(1).trim();
+                return new String[]{cmd, null};
+            }
+
             Matcher matcher = CHAT_PATTERN.matcher(input);
             if (matcher.find()) {
                 String cmd = matcher.group(1).trim();
