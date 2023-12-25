@@ -16,7 +16,7 @@ public class StringUtil {
      * 定义对话正则表达式模式 字母+任意数量空格+内容
      */
     private static final Pattern CHAT_PATTERN = Pattern.compile("(\\w+\\s+)(.*)");
-    private static final Pattern CMD_PATTERN = Pattern.compile("([\\p{Alpha}]+)");
+    private static final Pattern CMD_PATTERN = Pattern.compile("(^[A-Za-z]+$)");
 
 
     /**
